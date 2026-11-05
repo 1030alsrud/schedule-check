@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>선거운동 스케줄 조회</title>
+<style>
+  body{font-family:sans-serif;max-width:480px;margin:20px auto;padding:0 12px}
+  input{width:100%;font-size:18px;padding:10px;box-sizing:border-box}
+  .card{border:1px solid #ddd;border-radius:8px;padding:10px;margin-top:10px;line-height:1.7}
+  .p{color:#e8590c} .c{color:#2b8a3e}
+</style>
+</head>
+<body>
+<h2>선거운동 스케줄 조회</h2>
+<input id="q" list="names" placeholder="이름을 입력하세요 (예: 민경)" autocomplete="off">
+<datalist id="names"></datalist>
+<div id="out"></div>
+
+<script>
+const P="피켓", C="강의실";
+const D={
+ "월":{t:[["8:30~8:40",P],["8:40~8:50",C],["8:50~9:00",C],["12:30~12:40",C],["12:40~12:50",C],["12:50~13:00",C]],
+  r:["지영 지영 지영 지영 지영 지영",
+     "지민 지민 지민 지민 지민 지민",
+     "은지 은지 은지 금비 금비 금비",
+     "시현 시현 시현 서영 서영 서영",
+     "민경 민경 민경 재윤 재윤 재윤"]},
+ "화":{t:[["8:30~8:40",P],["8:40~8:50",C],["8:50~9:00",C],["9:30~9:40",C],["9:40~9:50",C],["14:30~14:40",P],["14:40~14:50",C]],
+  r:["지영 지영 지영 지영 지영 지영 지영",
+     "수연 수연 수연 수연 수연 지민 지민",
+     "지호 지호 지호 지호 지호 찬영 찬영",
+     "민경 민경 민경 민경 민경 윤서 윤서",
+     "주현 주현 주현 주현 주현 서영 서영"]},
+ "수":{t:[["8:30~8:40",P],["8:40~8:50",C],["8:50~9:00",C],["10:00~10:10",P],["10:10~10:20",C],["12:50~13:00",P],["13:00~13:10",C],["13:10~13:20",C]],
+  r:["지영 지영 지영 지영 지영 지영 지영 지영",
+     "지민 지민 지민 지민 지민 수연 수연 수연",
+     "하원 하원 하원 하원 하원 지민 지민 지민",
+     "찬영 찬영 찬영 찬영 찬영 유비 유비 유비",
+     "시현 시현 시현 금비 금비 은지 은지 은지"]},
+ "목":{t:[["8:30~8:40",P],["8:40~8:50",C],["8:50~9:00",C],["12:20~12:30",C],["12:30~12:40",C],["12:40~12:50",C]],
+  r:["지영 지영 지영 지영 지영 지영",
+     "수연 수연 수연 수연 수연 수연",
+     "윤서 윤서 윤서 지민 지민 지민",
+     "승훈 승훈 승훈 유비 유비 유비",
+     "주현 주현 주현 하원 하원 하원"]},
+ "금":{t:[["9:30~9:40",C],["9:40~9:50",C],["10:00~10:10",P],["10:10~10:20",C],["10:20~10:30",C]],
+  r:["지영 지영 지영 지영 지영",
+     "수연 수연 수연 수연 수연",
+     "지민 지민 지민 지민 지민",
+     "승훈 승훈 승훈 승훈 승훈",
+     "재윤 재윤 재윤 재윤 재윤"]}
+};
+const M=[
+ {d:"11/10(화) 13:00~13:10",p:"제2사범관 앞",n:"지영 수연 지민 재윤 찬영 승훈 민경"},
+ {d:"11/18(수) 16:40~16:50",p:"제1사범관 앞",n:"지영 수연 지민 시현 재윤 은지 금비 서영 유비 주현 찬영 민경 지호"},
+ {d:"11/23(월) 13:00~13:10",p:"제1사범관 앞",n:"지영 수연 지민 시현 재윤 은지 금비 서영 유비 주현 승훈 민경 지호"}
+];
+
+const names=new Set();
+for(const k in D) D[k].r.forEach(r=>r.split(" ").forEach(n=>names.add(n)));
+M.forEach(m=>m.n.split(" ").forEach(n=>names.add(n)));
+document.getElementById("names").innerHTML=[...names].sort().map(n=>`<option value="${n}">`).join("");
+
+const q=document.getElementById("q"), out=document.getElementById("out");
+q.addEventListener("input",()=>{
+  const name=q.value.trim();
+  if(!name){out.innerHTML="";return;}
+  let h="";
+  for(const day in D){
+    const items=[];
+    D[day].r.forEach(row=>row.split(" ").forEach((n,i)=>{ if(n===name) items.push(D[day].t[i]); }));
+    if(items.length){
+      h+=`<div class="card"><b>${day}요일</b><br>`+
+        items.map(([t,type])=>`<span class="${type===P?'p':'c'}">${t} (${type} 유세)</span>`).join("<br>")+`</div>`;
+    }
+  }
+  const mics=M.filter(m=>m.n.split(" ").includes(name));
+  if(mics.length){
+    h+=`<div class="card"><b>야외 마이크 유세</b><br>`+mics.map(m=>`${m.d} · ${m.p}`).join("<br>")+`</div>`;
+  }
+  out.innerHTML=h||`<div class="card">일치하는 이름이 없어요.</div>`;
+});
+</script>
+</body>
+</html>
